@@ -22,12 +22,19 @@ WISOs:
 This is an average of 19.4 drinks per WISO. Additionally, I drank during J.E.M.O.E.D.E.R. 2024: 10 on Friday and 23 on Saturday, but none on Sunday.
 
 Members' Weekend: 6, 11, 1 (W10)
+
 ExCee Thessaloniki: 10, 8, 12, 16, 3, 13 (W16)
+
 Introcamp: 10, 17, 0 (W36)
+
 Board Camping: 9, 11, 6 (W39)
+
 Betastuf (my) consti: 25 (guesstimate, 3/12)
+
 Cover welcome back party: 20 (4/9)
+
 Cover annual party: 22 (21/3)
+
 via live centurion: 20 (22/2)
 
 
