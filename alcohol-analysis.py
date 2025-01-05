@@ -4,6 +4,9 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from matplotlib.colors import LogNorm
+from itertools import combinations
+from scipy.stats import ranksums
 
 
 def load_and_prepare_data(file_path):
@@ -80,8 +83,38 @@ def weekdays(data):
         plt.savefig("./plots/weekdays/boxplot_weekday.png")
         plt.close()
 
+    weekday_pairs = list(combinations(average_drinks_per_weekday.index, 2))
+    ttest_results = pd.DataFrame(
+        index=average_drinks_per_weekday.index, columns=average_drinks_per_weekday.index
+    )
+
+    def wilcoxon():
+        for day1, day2 in weekday_pairs:
+            drinks_day1 = daily_data[daily_data["Date"].dt.day_name() == day1]["Drinks"]
+            drinks_day2 = daily_data[daily_data["Date"].dt.day_name() == day2]["Drinks"]
+            stat, p_value = ranksums(drinks_day1, drinks_day2)
+            ttest_results.loc[day1, day2] = p_value
+            ttest_results.loc[day2, day1] = p_value
+
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(
+            ttest_results.astype(float),
+            annot=True,
+            cmap="coolwarm",
+            cbar_kws={"label": "p-value"},
+            norm=LogNorm(
+                vmin=ttest_results.min().min(), vmax=ttest_results.max().max()
+            ),
+        )
+        plt.title("Wilcoxon Rank-Sum Test p-values between Weekdays")
+        plt.xlabel("Weekday")
+        plt.ylabel("Weekday")
+        plt.savefig("./plots/weekdays/wilcoxon_heatmap.png")
+        plt.close()
+
     bar_chart()
     boxplot()
+    wilcoxon()
 
 
 def daily(data):
@@ -339,6 +372,9 @@ def print_stats(data):
     longest_drinking_streak = (
         drinking_streaks.max() if not drinking_streaks.empty else 0
     )
+    weekly_data = data.resample("W-SUN", on="Date").sum().reset_index()
+    at_least_20 = daily_data[daily_data["Drinks"] >= 20]["Date"]
+    highest_week = weekly_data.loc[weekly_data["Drinks"].idxmax()]
 
     print(f"Total drinks: {total_drinks}")
     print(f"Days drinking: {days_drinking}")
@@ -351,6 +387,12 @@ def print_stats(data):
         print(f"  {day}: {avg:.2f}")
     print(f"Longest sober streak: {longest_sober_streak} days")
     print(f"Longest drinking streak: {longest_drinking_streak} days")
+    print("Dates with 20+ drinks:")
+    for date in at_least_20:
+        print("  " + date.strftime("%Y-%m-%d"))
+    print(
+        f"Week with highest drinks: W{highest_week['Date'].strftime('%V')} with {highest_week['Drinks']} drinks"
+    )
 
 
 def main():
